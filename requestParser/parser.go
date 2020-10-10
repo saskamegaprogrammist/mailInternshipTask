@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// getting http request and reading response body
+
 func countURL(url string) (int, error) {
 	count := 0
 	response, err := http.Get(url)
@@ -27,6 +29,8 @@ func countURL(url string) (int, error) {
 	count = strings.Count(string(bodyBytes), GolangString)
 	return count, nil
 }
+
+// reading file
 
 func countFile(filename string) (int, error) {
 	count := 0

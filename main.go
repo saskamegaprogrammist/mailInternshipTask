@@ -9,10 +9,14 @@ import (
 	"strconv"
 )
 
+// flags assignment
+
 func argsAssign(flags *flag.FlagSet) {
 	flags.Uint64("k", 5, "max number of goroutines for requests")
 	flags.Bool("e", false, "print errors")
 }
+
+// flags lookup
 
 func getArguments(flags *flag.FlagSet) (int, bool) {
 	var errorsBool bool
@@ -31,8 +35,10 @@ func getArguments(flags *flag.FlagSet) (int, bool) {
 	return procNumber, errorsBool
 }
 
+// printing errors
+
 func printErrors(errors []error) {
-	for _, e:= range errors {
+	for _, e := range errors {
 		fmt.Println(e)
 	}
 }
@@ -46,7 +52,7 @@ func main() {
 	}
 	procNumber, errorsBool := getArguments(&flags)
 	var errors []error
-	err = requestParser.ReadStdin(procNumber, &errors)
+	err = requestParser.ReadStdinWriteStdout(procNumber, &errors)
 	if err != nil {
 		log.Println(err)
 	}

@@ -8,6 +8,8 @@ const (
 	URL
 )
 
+// resource type checker
+
 func getResourceType(resource string) int {
 	parsedURL, err := url.ParseRequestURI(resource)
 	if err != nil {

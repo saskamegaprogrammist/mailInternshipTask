@@ -3,10 +3,13 @@ package requestParser
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"sync"
 )
+
+// worker task to process request
 
 func parseRequest(stringRoutine chan Request, doneChannel chan EmptyStruct, resultsChannel chan Request, wg *sync.WaitGroup, errors *[]error) {
 	defer wg.Done()
@@ -26,6 +29,8 @@ func parseRequest(stringRoutine chan Request, doneChannel chan EmptyStruct, resu
 	<-doneChannel
 }
 
+// reading results from channel
+
 func processResults(resultsChannel chan Request, requests *[]Request, wgGlobal *sync.WaitGroup) {
 	for result := range resultsChannel {
 		*requests = append(*requests, result)
@@ -33,6 +38,7 @@ func processResults(resultsChannel chan Request, requests *[]Request, wgGlobal *
 	wgGlobal.Done()
 }
 
+// creating worker processes for requests
 
 func processRequests(requestChannel chan Request, resultsChannel chan Request, wgGlobal *sync.WaitGroup, procNumber int, errors *[]error) {
 	doneChannel := make(chan EmptyStruct, procNumber)
@@ -49,13 +55,15 @@ func processRequests(requestChannel chan Request, resultsChannel chan Request, w
 	wgGlobal.Done()
 }
 
+// writing results to stdout
+
 func writeAnswers(requests []Request, writer *bufio.Writer) error {
 	var err error
 	sort.SliceStable(requests, func(i, j int) bool {
 		return requests[i].id < requests[j].id
 	})
 	total := 0
-	for i := range requests{
+	for i := range requests {
 		_, err = writer.WriteString(fmt.Sprintf("Count for %s: %d\n", requests[i].resource, requests[i].count))
 		if err != nil {
 			return err
@@ -69,10 +77,12 @@ func writeAnswers(requests []Request, writer *bufio.Writer) error {
 	return nil
 }
 
-func ReadStdin(procNumber int, errors *[]error) error {
+// reading from stdin in loop
+
+func read(reader io.Reader, w io.Writer, procNumber int, errors *[]error) error {
 	var requests []Request
 	id := 0
-	writer := bufio.NewWriter(os.Stdout)
+	writer := bufio.NewWriter(w)
 	requestsChannel := make(chan Request)
 	resultsChannel := make(chan Request)
 	wgGlobal := &sync.WaitGroup{}
@@ -80,7 +90,7 @@ func ReadStdin(procNumber int, errors *[]error) error {
 	go processResults(resultsChannel, &requests, wgGlobal)
 	go processRequests(requestsChannel, resultsChannel, wgGlobal, procNumber, errors)
 
-	scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
 
 	for scanner.Scan() {
@@ -108,4 +118,8 @@ func ReadStdin(procNumber int, errors *[]error) error {
 		return fmt.Errorf("error writing results:%s\n", err.Error())
 	}
 	return nil
+}
+
+func ReadStdinWriteStdout(procNumber int, errors *[]error) error {
+	return read(os.Stdin, os.Stdout, procNumber, errors)
 }

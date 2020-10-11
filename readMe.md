@@ -6,6 +6,8 @@
 *integer* number of goroutines for requests
 - e - 
 *boolean* printing mistakes
+- rootDir - 
+*boolean* use root directory as files directory
 
 ### run app:
 

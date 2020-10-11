@@ -3,8 +3,9 @@ package requestParser
 import "net/url"
 
 const (
-	GolangString = "Go"
-	FILE         = iota
+	ProcNumStandart = 5
+	GolangString    = "Go"
+	FILE            = iota
 	URL
 )
 

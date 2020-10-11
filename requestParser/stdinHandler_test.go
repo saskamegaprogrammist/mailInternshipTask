@@ -2,10 +2,11 @@ package requestParser
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 )
+
+// tests for working directory
 
 const answerFirst = "Count for ../testFiles/a.txt: 8\nTotal: 8\n"
 const inputFirst = "../testFiles/a.txt"
@@ -18,7 +19,6 @@ func Test_Simple_1(t *testing.T) {
 		t.Errorf("Test_Simple_1 failed: %s", err)
 	}
 	s := buf.String()
-	fmt.Println(s)
 	if s != answerFirst {
 		t.Errorf("Test_Simple_1 failed: wrong answer")
 	}
@@ -35,7 +35,6 @@ func Test_Simple_2(t *testing.T) {
 		t.Errorf("Test_Simple_2 failed: %s", err)
 	}
 	s := buf.String()
-	fmt.Println(s)
 	if s != answerSecond {
 		t.Errorf("Test_Simple_2 failed: wrong answer")
 	}

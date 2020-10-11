@@ -6,13 +6,13 @@ import (
 )
 
 const (
-	ErrorId = -1
+	ErrorId         = -1
 	ProcNumStandart = 5
 	GolangString    = "Go"
 	FILE            = iota
 	URL
-	UrlTimeout = 10 * time.Second
-	MaxResponseBufferSize = 128*1024
+	UrlTimeout            = 10 * time.Second
+	MaxResponseBufferSize = 128 * 1024
 )
 
 // resource type checker

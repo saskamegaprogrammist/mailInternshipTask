@@ -10,14 +10,14 @@ import (
 // worker pool
 
 type WorkerPool struct {
-	timeout time.Duration
-	maxProcs int64
+	timeout      time.Duration
+	maxProcs     int64
 	currentProcs int64
-	wg  sync.WaitGroup
-	mutex      sync.Mutex
+	wg           sync.WaitGroup
+	mutex        sync.Mutex
 	requestsChan chan Request
-	requests *[]Request
-	errorsBool bool
+	requests     *[]Request
+	errorsBool   bool
 }
 
 // add worker to pool

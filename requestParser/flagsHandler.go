@@ -6,7 +6,6 @@ import (
 	"os"
 )
 
-
 // setting root directory
 
 func setDir(dir string) error {
@@ -16,7 +15,6 @@ func setDir(dir string) error {
 	}
 	return nil
 }
-
 
 // flags assignment
 
@@ -29,7 +27,7 @@ func FlagsParse() (int, bool, error) {
 		return int(*procNum), *errorsBool, fmt.Errorf("wrong k parameter, must be positive integer")
 	}
 	err := setDir(*filesDirectory)
-	if err != nil 	{
+	if err != nil {
 		return int(*procNum), *errorsBool, err
 	}
 	return int(*procNum), *errorsBool, nil

@@ -7,4 +7,3 @@ type Request struct {
 	resource string
 	count    int
 }
-

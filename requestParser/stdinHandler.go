@@ -40,14 +40,14 @@ func read(reader io.Reader, w io.Writer, procNumber int, errorsBool bool) error 
 	writer := bufio.NewWriter(w)
 
 	wp := WorkerPool{
-		timeout: time.Millisecond,
+		timeout:      time.Millisecond,
 		maxProcs:     int64(procNumber),
 		currentProcs: 0,
 		wg:           sync.WaitGroup{},
 		mutex:        sync.Mutex{},
 		requestsChan: make(chan Request),
-		requests : &requests,
-		errorsBool: errorsBool,
+		requests:     &requests,
+		errorsBool:   errorsBool,
 	}
 
 	scanner := bufio.NewScanner(reader)

@@ -1,7 +1,5 @@
 package requestParser
 
-type EmptyStruct struct{}
-
 // request model
 
 type Request struct {
@@ -9,3 +7,4 @@ type Request struct {
 	resource string
 	count    int
 }
+

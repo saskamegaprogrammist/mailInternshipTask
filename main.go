@@ -1,24 +1,18 @@
 package main
 
 import (
-	"flag"
 	"github.com/saskamegaprogrammist/mailInternshipTask/requestParser"
 	"log"
 )
 
 func main() {
-	var flags flag.FlagSet
-	procNumber, errorsBool, err := requestParser.HandleFlags(&flags)
+	procNumber, errorsBool, err := requestParser.FlagsParse()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	var errors []error
-	err = requestParser.ReadStdinWriteStdout(procNumber, &errors)
+	err = requestParser.ReadStdinWriteStdout(procNumber, errorsBool)
 	if err != nil {
 		log.Println(err)
-	}
-	if errorsBool {
-		requestParser.PrintErrors(errors)
 	}
 }

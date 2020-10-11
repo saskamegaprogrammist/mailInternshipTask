@@ -12,9 +12,8 @@ const answerFirst = "Count for ../testFiles/a.txt: 8\nTotal: 8\n"
 const inputFirst = "../testFiles/a.txt"
 
 func Test_Simple_1(t *testing.T) {
-	var errors []error
 	var buf bytes.Buffer
-	err := read(strings.NewReader(inputFirst), &buf, 5, &errors)
+	err := read(strings.NewReader(inputFirst), &buf, 5, false)
 	if err != nil {
 		t.Errorf("Test_Simple_1 failed: %s", err)
 	}
@@ -28,9 +27,8 @@ const answerSecond = "Count for ../testFiles/a.txt: 8\nCount for ../testFiles/a.
 const inputSecond = "../testFiles/a.txt\n../testFiles/a.txt\n../testFiles/b.txt\n../testFiles/b.txt\n../testFiles/b.txt"
 
 func Test_Simple_2(t *testing.T) {
-	var errors []error
 	var buf bytes.Buffer
-	err := read(strings.NewReader(inputSecond), &buf, 5, &errors)
+	err := read(strings.NewReader(inputSecond), &buf, 5, false)
 	if err != nil {
 		t.Errorf("Test_Simple_2 failed: %s", err)
 	}

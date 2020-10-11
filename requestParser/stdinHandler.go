@@ -7,53 +7,8 @@ import (
 	"os"
 	"sort"
 	"sync"
+	"time"
 )
-
-// worker task to process request
-
-func parseRequest(stringRoutine chan Request, doneChannel chan EmptyStruct, resultsChannel chan Request, wg *sync.WaitGroup, errors *[]error) {
-	defer wg.Done()
-	var request Request
-	var err error
-	request = <-stringRoutine
-	resourceType := getResourceType(request.resource)
-	if resourceType == URL {
-		request.count, err = countURL(request.resource)
-	} else {
-		request.count, err = countFile(request.resource)
-	}
-	if err != nil {
-		*errors = append(*errors, err)
-	}
-	resultsChannel <- request
-	<-doneChannel
-}
-
-// reading results from channel
-
-func processResults(resultsChannel chan Request, requests *[]Request, wgGlobal *sync.WaitGroup) {
-	for result := range resultsChannel {
-		*requests = append(*requests, result)
-	}
-	wgGlobal.Done()
-}
-
-// creating worker processes for requests
-
-func processRequests(requestChannel chan Request, resultsChannel chan Request, wgGlobal *sync.WaitGroup, procNumber int, errors *[]error) {
-	doneChannel := make(chan EmptyStruct, procNumber)
-	wg := &sync.WaitGroup{}
-	for request := range requestChannel {
-		doneChannel <- EmptyStruct{}
-		stringRoutine := make(chan Request, 1)
-		wg.Add(1)
-		stringRoutine <- request
-		go parseRequest(stringRoutine, doneChannel, resultsChannel, wg, errors)
-	}
-	wg.Wait()
-	close(resultsChannel)
-	wgGlobal.Done()
-}
 
 // writing results to stdout
 
@@ -79,16 +34,21 @@ func writeAnswers(requests []Request, writer *bufio.Writer) error {
 
 // reading from stdin in loop
 
-func read(reader io.Reader, w io.Writer, procNumber int, errors *[]error) error {
+func read(reader io.Reader, w io.Writer, procNumber int, errorsBool bool) error {
 	var requests []Request
 	id := 0
 	writer := bufio.NewWriter(w)
-	requestsChannel := make(chan Request)
-	resultsChannel := make(chan Request)
-	wgGlobal := &sync.WaitGroup{}
-	wgGlobal.Add(2)
-	go processResults(resultsChannel, &requests, wgGlobal)
-	go processRequests(requestsChannel, resultsChannel, wgGlobal, procNumber, errors)
+
+	wp := WorkerPool{
+		timeout: time.Millisecond,
+		maxProcs:     int64(procNumber),
+		currentProcs: 0,
+		wg:           sync.WaitGroup{},
+		mutex:        sync.Mutex{},
+		requestsChan: make(chan Request),
+		requests : &requests,
+		errorsBool: errorsBool,
+	}
 
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanLines)
@@ -103,12 +63,12 @@ func read(reader io.Reader, w io.Writer, procNumber int, errors *[]error) error 
 				resource: text,
 				count:    0,
 			}
-			requestsChannel <- request
+			wp.AddRequest(request)
 			id++
 		}
 	}
-	close(requestsChannel)
-	wgGlobal.Wait()
+	wp.wg.Wait()
+
 	err := writeAnswers(requests, writer)
 	if err != nil {
 		return fmt.Errorf("error writing results:%s\n", err.Error())
@@ -120,6 +80,6 @@ func read(reader io.Reader, w io.Writer, procNumber int, errors *[]error) error 
 	return nil
 }
 
-func ReadStdinWriteStdout(procNumber int, errors *[]error) error {
-	return read(os.Stdin, os.Stdout, procNumber, errors)
+func ReadStdinWriteStdout(procNumber int, errorsBool bool) error {
+	return read(os.Stdin, os.Stdout, procNumber, errorsBool)
 }

@@ -2,7 +2,7 @@ package requestParser
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -12,7 +12,10 @@ import (
 
 func countURL(url string) (int, error) {
 	count := 0
-	response, err := http.Get(url)
+	client := http.Client{
+		Timeout: UrlTimeout,
+	}
+	response, err := client.Get(url)
 	if err != nil {
 		return count, fmt.Errorf("error getting url %s request: %s", url, err.Error())
 	}
@@ -21,12 +24,20 @@ func countURL(url string) (int, error) {
 	if response.StatusCode != http.StatusOK {
 		return count, fmt.Errorf("error getting url %s request, reponse status code: %d", url, response.StatusCode)
 	}
-	bodyBytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return count, fmt.Errorf("error reading response body from url %s request: %s", url, err.Error())
+
+	for {
+		responseBuffer := make([]byte, MaxResponseBufferSize)
+		_, err = response.Body.Read(responseBuffer)
+		if err == io.EOF {
+			count += strings.Count(string(responseBuffer), GolangString)
+			break
+		}
+		if err != nil {
+			return count, fmt.Errorf("error reading response from %s: %s", url, err.Error())
+		}
+		count += strings.Count(string(responseBuffer), GolangString)
 	}
 
-	count = strings.Count(string(bodyBytes), GolangString)
 	return count, nil
 }
 
